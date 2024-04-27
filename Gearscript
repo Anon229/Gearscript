@@ -1,0 +1,215 @@
+
+if game.CoreGui:FindFirstChild("gui") then
+game.CoreGui.gui:Destroy()
+end
+
+local gui = Instance.new("ScreenGui")
+local Frame = Instance.new("Frame")
+local ImageLabel = Instance.new("ImageLabel")
+local player = Instance.new("TextBox")
+local explode = Instance.new("TextButton")
+local tools = Instance.new("TextButton")
+local grid = Instance.new("UIGridLayout")
+
+--Properties:
+
+gui.Name = "gui"
+gui.Parent = game.CoreGui
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+Frame.Parent = gui
+Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Frame.Position = UDim2.new(0.342989594, 0, 0.27131784, 0)
+Frame.Size = UDim2.new(0, 254, 0, 254)
+Frame.Active = true
+Frame.Draggable = true
+
+ImageLabel.Parent = Frame
+ImageLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ImageLabel.Size = UDim2.new(0, 254, 0, 254)
+ImageLabel.Image = "http://www.roblox.com/asset/?id=6180399057"
+
+player.Name = "player"
+player.Parent = ImageLabel
+player.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+player.Position = UDim2.new(0.11023622, 0, 0.677165329, 0)
+player.Size = UDim2.new(0, 201, 0, 39)
+player.ClearTextOnFocus = true
+player.Font = Enum.Font.SourceSans
+player.PlaceholderText = "Gear ID"
+player.Text = ""
+player.TextColor3 = Color3.fromRGB(0, 0, 0)
+player.TextScaled = true
+player.TextSize = 14.000
+player.TextWrapped = true
+
+explode.Name = "explode"
+explode.Parent = ImageLabel
+explode.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+explode.Position = UDim2.new(0.11023622, 0, 0.870078743, 0)
+explode.Size = UDim2.new(0, 201, 0, 33)
+explode.Font = Enum.Font.SourceSans
+explode.Text = "Insert Gear"
+explode.TextColor3 = Color3.fromRGB(0, 0, 0)
+explode.TextScaled = true
+explode.TextSize = 14.000
+explode.TextWrapped = true
+
+tools.Name = "tools"
+tools.Parent = ImageLabel
+tools.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+tools.Position = UDim2.new(0.11023622, 0, 0.170078743, 0)
+tools.Size = UDim2.new(0, 201, 0, 33)
+tools.Font = Enum.Font.SourceSans
+tools.Text = "Unequip Gears"
+tools.TextColor3 = Color3.fromRGB(0, 0, 0)
+tools.TextScaled = true
+tools.TextSize = 14.000
+tools.TextWrapped = true
+
+grid.Parent = ImageLabel
+grid.SortOrder = Enum.SortOrder.LayoutOrder
+grid.CellSize = UDim2.new(0, 81, 0, 20)
+
+local StarterGui = game:GetService("StarterGui")
+StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, true)
+
+local dropping = false
+local fixing = false
+
+local function AddGear(name, id, repair)
+btn = Instance.new("TextButton")
+btn.Parent = ImageLabel
+btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+btn.Position = UDim2.new(0.11023622, 0, 0.350078743, 0)
+btn.Size = UDim2.new(0, 201, 0, 33)
+btn.Font = Enum.Font.SourceSans
+btn.Text = name
+btn.TextColor3 = Color3.fromRGB(0, 0, 0)
+btn.TextScaled = true
+btn.TextSize = 14.000
+btn.TextWrapped = true
+
+btn.MouseButton1Click:Connect(function()
+if game.PlaceId == 7041939546 then
+local args = {
+    [1] = {
+        ["Action"] = "ToggleGear",
+        ["Id"] = id
+    }
+}
+
+game:GetService("ReplicatedStorage").CatalogGuiRemote:InvokeServer(unpack(args))
+else
+local args = {
+    [1] = "Hair",
+    [2] = id
+}
+game:GetService("ReplicatedStorage").Events.AddClothing:FireServer(unpack(args))
+if repair == 1 then
+fixing = true
+wait(0.3)
+fixing = false
+game:GetService("Players").LocalPlayer.Character.Humanoid:UnequipTools()
+end
+end
+end)
+end
+
+game:GetService("RunService").RenderStepped:Connect(function()
+if dropping and not fixing then
+for i,v in pairs(game:GetService("Players").LocalPlayer.Character:GetChildren()) do
+if v:IsA("Tool") then
+v.Parent = game:GetService("Workspace")
+end
+end
+end
+end)
+
+local function AddButton(name, func)
+btn = Instance.new("TextButton")
+btn.Parent = ImageLabel
+btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+btn.Position = UDim2.new(0.11023622, 0, 0.350078743, 0)
+btn.Size = UDim2.new(0, 201, 0, 33)
+btn.Font = Enum.Font.SourceSans
+btn.Text = name
+btn.TextColor3 = Color3.fromRGB(0, 0, 0)
+btn.TextScaled = true
+btn.TextSize = 14.000
+btn.TextWrapped = true
+
+btn.MouseButton1Click:Connect(function()
+func()
+end)
+end
+
+explode.MouseButton1Click:Connect(function()
+if game.PlaceId == 7041939546 then
+local args = {
+    [1] = {
+        ["Action"] = "ToggleGear",
+        ["Id"] = player.Text
+    }
+}
+
+game:GetService("ReplicatedStorage").CatalogGuiRemote:InvokeServer(unpack(args))
+else
+local args = {
+    [1] = "Hair",
+    [2] = player.Text
+}
+
+game:GetService("ReplicatedStorage").Events.AddClothing:FireServer(unpack(args))
+fixing = true
+wait(0.3)
+game:GetService("Players").LocalPlayer.Character.Humanoid:UnequipTools()
+fixing = false
+end
+end)
+
+tools.MouseButton1Click:Connect(function()
+game.Players.LocalPlayer.Character.Humanoid:UnequipTools()
+end)
+
+AddButton("Drop Gears", function()
+for i,v in pairs(game:GetService("Players").LocalPlayer.Character:GetChildren()) do
+if v:IsA("Tool") then
+v.Parent = game:GetService("Workspace")
+end
+end
+end)
+
+AddButton("DropOnSpawn", function()
+if dropping == true then
+dropping = false
+print("not dropping")
+elseif dropping == false then
+dropping = true
+print("dropping")
+end
+end)
+
+AddGear("Gravity Coil", 16688968)
+AddGear("Body Swap", 78730532)
+AddGear("Blackhole Bomb", 28277486)
+AddGear("Fuse Bomb", 11563251)
+AddGear("Remote Mine", 33383241)
+AddGear("Rocket Launcher", 190094159)
+AddGear("Troll Pet", 88143060)
+AddGear("Polar Mount", 332747874)
+AddGear("Rhino", 1178843200)
+AddGear("Paint Brush", 18474459, 1)
+AddGear("Flashlight", 116040770)
+AddGear("Bundle Of TNT", 12902404)
+AddGear("Rocket Launcher 2", 32356064)
+AddGear("Exponential Rocket Launcher", 90718505)
+AddGear("Subspace Tripmine", 11999247)
+AddGear("2012 Firework", 67747884)
+AddGear("Azure Periastron Alpha", 69499437, 1)
+AddGear("Crimson Periastron Mu", 99119240, 1)
+AddGear("Amethyst Periastron Kappa", 93136802, 1)
+AddGear("Tornado Summoner", 102705454)
+AddGear("Boombox", 212641536)
+AddGear("Deluxe Rainbow Magic Carpet", 477910063, 1)
+AddGear("Red Convertible", 164207580, 1)
